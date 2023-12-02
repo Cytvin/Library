@@ -1,0 +1,322 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Library.ViewModels"
+             xmlns:dbmodels="clr-namespace:LibraryDAL.EFModels;assembly=LibraryDAL"
+             x:Class="Library.MainPage"
+             x:DataType="viewmodels:MainPageViewModel">
+
+    <ContentPage.MenuBarItems>
+        <MenuBarItem Text="Справочники">
+            <MenuFlyoutSubItem Text="Читатели">
+                <MenuFlyoutItem Text="Загрузить таблицу читателей"
+                                Command="{Binding ShowPeopleTable}"/>
+                <MenuFlyoutItem Text="Добавить читателя"
+                                Command="{Binding InsertPeople}"/>
+                <MenuFlyoutItem Text="Редактировать читателя"
+                                Command="{Binding UpdatePeople}"/>
+                <MenuFlyoutItem Text="Удалить читателя"
+                                Command="{Binding DeletePeople}"/>
+            </MenuFlyoutSubItem>
+            <MenuFlyoutSeparator/>
+            <MenuFlyoutSubItem Text="Книги">
+                <MenuFlyoutItem Text="Загрузить таблицу книг"
+                                Command="{Binding ShowBookTable}"/>
+                <MenuFlyoutItem Text="Добавить книгу"
+                                Command="{Binding InsertBook}"/>
+                <MenuFlyoutItem Text="Редактировать книгу"
+                                Command="{Binding UpdateBook}"/>
+                <MenuFlyoutItem Text="Удалить книгу"
+                                Command="{Binding DeleteBook}"/>
+            </MenuFlyoutSubItem>
+        </MenuBarItem>
+
+        <MenuBarItem Text="Упревление книгами">
+            <MenuFlyoutItem Text="Список выданых книг"
+                            Command="{Binding ShowBookReservationTable}"/>
+            <MenuFlyoutItem Text="Выдать книгу"
+                            Command="{Binding InsertBookReservation}"/>
+            <MenuFlyoutItem Text="Изменить инфо. о выдаче книги"
+                            Command="{Binding UpdateBookReservation}"/>
+            <MenuFlyoutItem Text="Вернуть книгу"
+                            Command="{Binding DeleteBookReservation}"/>
+        </MenuBarItem>
+    </ContentPage.MenuBarItems>
+
+    <Frame BorderColor="Black"
+           CornerRadius="10"
+           Margin="25">
+        <FlexLayout Direction="Column">
+            <Grid IsEnabled="{Binding IsBookTableEnable}"
+                  IsVisible="{Binding IsBookTableEnable}">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="70"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Frame BorderColor="Black"
+                           Grid.Column="0"
+                           CornerRadius="0"
+                           BackgroundColor="Gray">
+                        <Label Text="ID"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               FontSize="20"/>
+                    </Frame>
+                    <Frame BorderColor="Black"
+                           Grid.Column="1"
+                           CornerRadius="0"
+                           BackgroundColor="Gray">
+                        <Label Text="Автор"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               FontSize="20"/>
+                    </Frame>
+                    <Frame BorderColor="Black"
+                           Grid.Column="2"
+                           CornerRadius="0"
+                           BackgroundColor="Gray">
+                        <Label Text="Название книги"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               FontSize="20"/>
+                    </Frame>
+                    <Frame BorderColor="Black"
+                           Grid.Column="3"
+                           CornerRadius="0"
+                           BackgroundColor="Gray">
+                        <Label Text="Год издания"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               FontSize="20"/>
+                    </Frame>
+                </Grid>
+
+                <CollectionView Grid.Row="1"
+                                SelectionMode="Single"
+                                ItemsSource="{Binding Books}"
+                                SelectedItem="{Binding SelectedBook}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="dbmodels:Book">
+                            <Grid ColumnDefinitions="*,*,*,*">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup Name="CommonStates">
+                                        <VisualState Name="Normal"></VisualState>
+                                        <VisualState Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="LightGray"/>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+
+                                <Frame BorderColor="Black" Grid.Column="0" CornerRadius="0" BackgroundColor="Transparent">
+                                    <Label Text="{Binding Id}"/>
+                                </Frame>
+                                <Frame BorderColor="Black" Grid.Column="1" CornerRadius="0" BackgroundColor="Transparent">
+                                    <Label Text="{Binding Author}"/>
+                                </Frame>
+                                <Frame BorderColor="Black" Grid.Column="2" CornerRadius="0" BackgroundColor="Transparent">
+                                    <Label Text="{Binding Name}"/>
+                                </Frame>
+                                <Frame BorderColor="Black" Grid.Column="3" CornerRadius="0" BackgroundColor="Transparent">
+                                    <Label Text="{Binding PublishingYear}"/>
+                                </Frame>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+
+                    <CollectionView.EmptyView>
+                        <ContentView>
+                            <FlexLayout AlignItems="Center"
+                                        Direction="Column"
+                                        JustifyContent="SpaceEvenly">
+                                <Label Text="Нет данных для отображения"/>
+                            </FlexLayout>
+                        </ContentView>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+            </Grid>
+
+            <Grid IsEnabled="{Binding IsPeopleTableEnable}"
+                  IsVisible="{Binding IsPeopleTableEnable}">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="70"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Frame BorderColor="Black"
+                           Grid.Column="0"
+                           CornerRadius="0"
+                           BackgroundColor="Gray">
+                        <Label Text="ID"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               FontSize="20"/>
+                    </Frame>
+
+                    <Frame BorderColor="Black"
+                           Grid.Column="1"
+                           CornerRadius="0"
+                           BackgroundColor="Gray">
+                        <Label Text="ФИО"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               FontSize="20"/>
+                    </Frame>
+                </Grid>
+
+                <CollectionView Grid.Row="1"
+                                SelectionMode="Single"
+                                ItemsSource="{Binding People}"
+                                SelectedItem="{Binding SelectedPerson}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="dbmodels:Person">
+                            <Grid ColumnDefinitions="*,*">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup Name="CommonStates">
+                                        <VisualState Name="Normal"></VisualState>
+                                        <VisualState Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="LightGray"/>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+
+                                <Frame BorderColor="Black" Grid.Column="0" CornerRadius="0" BackgroundColor="Transparent">
+                                    <Label Text="{Binding Id}"/>
+                                </Frame>
+
+                                <Frame BorderColor="Black" Grid.Column="1" CornerRadius="0" BackgroundColor="Transparent">
+                                    <Label Text="{Binding Fio}"/>
+                                </Frame>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+
+            <Grid IsEnabled="{Binding IsBookReservationTableEnable}"
+                  IsVisible="{Binding IsBookReservationTableEnable}">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="70"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Frame BorderColor="Black"
+                           Grid.Column="0"
+                           CornerRadius="0"
+                           BackgroundColor="Gray">
+                        <Label Text="ID"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               FontSize="20"/>
+                    </Frame>
+
+                    <Frame BorderColor="Black"
+                           Grid.Column="1"
+                           CornerRadius="0"
+                           BackgroundColor="Gray">
+                        <Label Text="ФИО читателя"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               FontSize="20"/>
+                    </Frame>
+                    
+                    <Frame BorderColor="Black"
+                           Grid.Column="2"
+                           CornerRadius="0"
+                           BackgroundColor="Gray">
+                        <Label Text="Название книги"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               FontSize="20"/>
+                    </Frame>
+                    
+                    <Frame BorderColor="Black"
+                           Grid.Column="3"
+                           CornerRadius="0"
+                           BackgroundColor="Gray">
+                        <Label Text="Дата резервации"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               FontSize="20"/>
+                    </Frame>
+                </Grid>
+
+                <CollectionView Grid.Row="1"
+                                SelectionMode="Single"
+                                ItemsSource="{Binding BookReservations}"
+                                SelectedItem="{Binding SelectedBookReservation}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="dbmodels:BookReservation">
+                            <Grid ColumnDefinitions="*,*,*,*">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup Name="CommonStates">
+                                        <VisualState Name="Normal"></VisualState>
+                                        <VisualState Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="LightGray"/>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+
+                                <Frame BorderColor="Black" Grid.Column="0" CornerRadius="0" BackgroundColor="Transparent">
+                                    <Label Text="{Binding Id}"/>
+                                </Frame>
+
+                                <Frame BorderColor="Black" Grid.Column="1" CornerRadius="0" BackgroundColor="Transparent">
+                                    <Label Text="{Binding People.Fio}"/>
+                                </Frame>
+
+                                <Frame BorderColor="Black" Grid.Column="2" CornerRadius="0" BackgroundColor="Transparent">
+                                    <Label Text="{Binding Book.Name}"/>
+                                </Frame>
+
+                                <Frame BorderColor="Black" Grid.Column="3" CornerRadius="0" BackgroundColor="Transparent">
+                                    <Label Text="{Binding Date}"/>
+                                </Frame>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </FlexLayout>
+    </Frame>
+</ContentPage>
