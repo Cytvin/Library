@@ -71,6 +71,9 @@
 	  <MauiXaml Update="Popups\BookPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Popups\BookReservationPopup.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Popups\PersonPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

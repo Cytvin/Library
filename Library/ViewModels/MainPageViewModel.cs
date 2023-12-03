@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Maui.Views;
+﻿using CommunityToolkit.Maui.Core.Extensions;
+using CommunityToolkit.Maui.Views;
 using Library.Popups;
 using LibraryDAL;
 using LibraryDAL.EFModels;
@@ -17,10 +18,13 @@ namespace Library.ViewModels
         private bool _isBookTableEnable = false;
         private bool _isPeopleTableEnable = false;
         private bool _isBookReservationTableEnable = false;
+        private bool _isSearchInBookReservation = false;
 
         private ObservableCollection<Person> _people = new ObservableCollection<Person>();
         private ObservableCollection<Book> _books = new ObservableCollection<Book>();
         private ObservableCollection<BookReservation> _bookReservations = new ObservableCollection<BookReservation>();
+
+        private ICommand? _search;
 
         public ICommand ShowBookTable { get; private set; }
         public ICommand InsertBook { get; private set; }
@@ -34,10 +38,20 @@ namespace Library.ViewModels
         public ICommand InsertBookReservation { get; private set; }
         public ICommand UpdateBookReservation { get; private set; }
         public ICommand DeleteBookReservation { get; private set; }
+        public ICommand Search
+        {
+            get => _search;
+            set
+            {
+                _search = value;
+                OnPropertyChanged(this, nameof(Search));
+            }
+        }
 
         public Book? SelectedBook { get; set; }
         public Person? SelectedPerson { get; set; }
         public BookReservation? SelectedBookReservation { get; set; }
+        public int BookResevationSearchTypeIndex { get; set; }
         public bool IsBookTableEnable
         {
             get => _isBookTableEnable;
@@ -65,6 +79,16 @@ namespace Library.ViewModels
             {
                 _isBookReservationTableEnable = value;
                 OnPropertyChanged(this, nameof(IsBookReservationTableEnable));
+            }
+        }
+
+        public bool IsSearchInBookReservation
+        {
+            get => _isSearchInBookReservation;
+            set
+            {
+                _isSearchInBookReservation = value;
+                OnPropertyChanged(this, nameof(IsSearchInBookReservation));
             }
         }
 
@@ -125,7 +149,9 @@ namespace Library.ViewModels
             IsBookTableEnable = true;
             IsPeopleTableEnable = false;
             IsBookReservationTableEnable = false;
+            IsSearchInBookReservation = false;
             Books = new ObservableCollection<Book>(_bookFacade.SelectAll());
+            Search = new Command<string>(OnSearchBook);
         }
 
         private async void OnInsertBook()
@@ -166,12 +192,25 @@ namespace Library.ViewModels
             OnShowBookTable();
         }
 
+        private void OnSearchBook(string searchString)
+        {
+            if (string.IsNullOrEmpty(searchString))
+            {
+                Books = _bookFacade.SelectAll().ToObservableCollection();
+                return;
+            }
+
+            Books = _bookFacade.SelectAll().Where(b => b.Name.ToLower().Contains(searchString.ToLower())).ToObservableCollection();
+        }
+
         private void OnShowPeopleTable()
         {
             IsBookTableEnable = false;
             IsPeopleTableEnable = true;
             IsBookReservationTableEnable = false;
+            IsSearchInBookReservation = false;
             People = new ObservableCollection<Person>(_personFacade.SelectAll());
+            Search = new Command<string>(OnSearchPerson);
         }
 
         private async void OnInsertPeople()
@@ -213,28 +252,63 @@ namespace Library.ViewModels
             OnShowPeopleTable();
         }
 
+        private void OnSearchPerson(string searchString)
+        {
+            if (string.IsNullOrEmpty(searchString))
+            {
+                People = _personFacade.SelectAll().ToObservableCollection();
+                return;
+            }
+
+            People = _personFacade.SelectAll().Where(p => p.Fio.ToLower().Contains(searchString.ToLower())).ToObservableCollection();
+        }
+
         private void OnShowBookReservationTable()
         {
             IsBookTableEnable = false;
             IsPeopleTableEnable = false;
             IsBookReservationTableEnable = true;
+            IsSearchInBookReservation = true;
             BookReservations = new ObservableCollection<BookReservation>(_bookReservationFacade.SelectAll());
+            Search = new Command<string>(OnSearchBookReservation);
         }
 
-        private void OnInsertBookReservation()
+        private async void OnInsertBookReservation()
         {
+            IEnumerable<Person> personList = _personFacade.SelectAll();
+            IEnumerable<Book> bookList = _bookFacade.SelectAll().Where(br => br.BookReservations.Count == 0 || br.BookReservations == null).ToList();
 
-        }
-
-        private void OnUpdateBookReservation()
-        {
-            if (SelectedBookReservation == null)
+            if (bookList.Count() == 0)
             {
-                _view.DisplayAlert("Ошибка", "Запись не выбрана", "Отмена");
+                await _view.DisplayAlert("Ошибка", "Нет книг, доступных к выдаче", "Отмена");
                 return;
             }
 
+            object? bookReservation = await _view.ShowPopupAsync(new BookReservationPopup(personList, bookList, _bookReservationFacade));
 
+            if (bookReservation != null)
+            {
+                OnShowBookReservationTable();
+            }
+        }
+
+        private async void OnUpdateBookReservation()
+        {
+            if (SelectedBookReservation == null)
+            {
+                await _view.DisplayAlert("Ошибка", "Запись не выбрана", "Отмена");
+                return;
+            }
+
+            IEnumerable<Person> personList = _personFacade.SelectAll();
+            IEnumerable<Book> bookList = _bookFacade.SelectAll();
+
+            object? bookReservation = await _view.ShowPopupAsync(new BookReservationPopup(personList, bookList, _bookReservationFacade, SelectedBookReservation));
+
+            if (bookReservation != null)
+            {
+                OnShowBookReservationTable();
+            }
         }
 
         private void OnDeleteBookReservation()
@@ -245,7 +319,26 @@ namespace Library.ViewModels
                 return;
             }
 
+            _bookReservationFacade.Delete(SelectedBookReservation);
+            OnShowBookReservationTable();
+        }
 
+        private void OnSearchBookReservation(string searchString)
+        {
+            if (string.IsNullOrEmpty(searchString))
+            {
+                BookReservations = _bookReservationFacade.SelectAll().ToObservableCollection();
+                return;
+            }
+
+            if (BookResevationSearchTypeIndex == 0)
+            {
+                BookReservations = _bookReservationFacade.SelectAll().Where(br => br.People.Fio.ToLower().Contains(searchString.ToLower())).ToObservableCollection();
+            }
+            else
+            {
+                BookReservations = _bookReservationFacade.SelectAll().Where(br => br.Book.Name.ToLower().Contains(searchString.ToLower())).ToObservableCollection();
+            } 
         }
     }
 }

@@ -43,7 +43,7 @@ namespace Library.ViewModels
 
         private void OnInsertSave()
         {
-            if (IsFioEntryCorrect() == false)
+            if (string.IsNullOrWhiteSpace(Fio) == true)
             {
                 App.Current?.MainPage?.DisplayAlert("Ошибка", "Не заполнено поле ФИО", "Отмена");
                 return;
@@ -59,7 +59,7 @@ namespace Library.ViewModels
 
         private void OnUpdateSave()
         {
-            if (IsFioEntryCorrect() == false) 
+            if (string.IsNullOrWhiteSpace(Fio) == true) 
             {
                 App.Current?.MainPage?.DisplayAlert("Ошибка", "Не заполнено поле ФИО", "Отмена");
                 return;
@@ -73,21 +73,6 @@ namespace Library.ViewModels
             _person.Fio = Fio;
             _personFacade.Update(_person);
             _view.Close(_person);
-        }
-
-        private bool IsFioEntryCorrect()
-        {
-            if (Fio == null)
-            {
-                return false;
-            }
-
-            if (Fio.Length == 0)
-            {
-                return false;
-            }
-
-            return true;
         }
     }
 }

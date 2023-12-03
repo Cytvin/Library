@@ -85,27 +85,7 @@ namespace Library.ViewModels
 
         private bool IsAllEntriesFillCorrect()
         {
-            return IsEntryFillCorrect(Name) & IsEntryFillCorrect(Author) & IsPublishingYearEntryFillCorrect();
-        }
-
-        private bool IsEntryFillCorrect(string? entry)
-        {
-            if (entry == null)
-            {
-                return false;
-            }
-
-            if (entry.Length == 0)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool IsPublishingYearEntryFillCorrect()
-        {
-            return IsEntryFillCorrect(PublishingYear) && int.TryParse(PublishingYear, out _);
+            return !string.IsNullOrWhiteSpace(Name) && !string.IsNullOrWhiteSpace(Author) && int.TryParse(PublishingYear, out _);
         }
     }
 }

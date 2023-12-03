@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:viewmodel="clr-namespace:Library.ViewModels"
+               x:Class="Library.Popups.BookReservationPopup"
+               x:DataType="viewmodel:BookReservationViewModel"
+               CanBeDismissedByTappingOutsideOfPopup="False"
+               Color="Transparent">
+
+    <Frame x:Name="PopupWindow"
+           BackgroundColor="White"
+           BorderColor="Black"
+           CornerRadius="25">
+        <StackLayout>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition x:Name="EntryList"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0"
+                       Text="{Binding Title}"
+                       HorizontalOptions="Center"/>
+                <StackLayout Grid.Row="1"
+                             VerticalOptions="Center">
+                    <Label Text="Читатель:"/>
+                    <Picker ItemsSource="{Binding People}"
+                            ItemDisplayBinding="{Binding Fio}"
+                            SelectedItem="{Binding SelectedPeople}"/>
+
+                    <Label Text="Книга:"/>
+                    <Picker ItemsSource="{Binding Books}"
+                            ItemDisplayBinding="{Binding Name}"
+                            SelectedItem="{Binding SelectedBook}"/>
+                </StackLayout>
+
+                <Button Grid.Row="2"
+                        Text="{Binding SaveButtonTitle}"
+                        Command="{Binding Save}"
+                        HorizontalOptions="Start"/>
+                <Button Grid.Row="2"
+                        Text="Закрыть"
+                        HorizontalOptions="End"
+                        Clicked="ButtonClose_Clicked"/>
+            </Grid>
+        </StackLayout>
+    </Frame>
+</toolkit:Popup>
